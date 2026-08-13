@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="theme-color" content="#8b4513">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="出师备考">
+<link rel="manifest" href="./manifest.json">
+<title>传统医学出师考核 · 一站式学习工具</title>
+<style>
+:root{color-scheme:light}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"Microsoft YaHei","PingFang SC",sans-serif;background:#f5f0eb;color:#2c2416;line-height:1.7;-webkit-tap-highlight-color:transparent}
+
+header{background:linear-gradient(135deg,#5b3a29,#7a4e36);color:#f5e6d3;padding:10px 16px;position:sticky;top:0;z-index:200;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 12px rgba(0,0,0,.15);min-height:48px}
+header h1{font-size:.95rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;margin:0 8px}
+header .hdr-btns{display:flex;gap:4px;flex-shrink:0;align-items:center}
+header button{background:rgba(255,255,255,.15);border:none;color:#f5e6d3;font-size:1.1rem;width:34px;height:34px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+header button:active{background:rgba(255,255,255,.3)}
+
+.progress-bar-wrap{background:#fff;padding:10px 16px;border-bottom:1px solid #e8ddd0;position:sticky;top:48px;z-index:99}
+.progress-bar-wrap .pb-label{font-size:.72rem;color:#8a7358;margin-bottom:4px;display:flex;justify-content:space-between}
+.progress-bar{height:6px;background:#e8ddd0;border-radius:3px;overflow:hidden}
+.progress-bar .fill{height:100%;background:linear-gradient(90deg,#c9a87c,#5b3a29);border-radius:3px;transition:width .4s}
+
+.tabbar{display:flex;background:#fff;border-bottom:2px solid #e8ddd0;position:sticky;top:92px;z-index:98}
+.tabbar .tab{flex:1;text-align:center;padding:10px 4px;font-size:.78rem;cursor:pointer;color:#8a7358;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s;user-select:none;min-height:40px;display:flex;align-items:center;justify-content:center;gap:3px}
+.tabbar .tab.active{color:#5b3a29;border-bottom-color:#c9a87c;font-weight:600}
+.tabbar .tab .tab-badge{display:inline-block;background:#c9a87c;color:#3a2210;font-size:.58rem;padding:1px 5px;border-radius:7px;min-width:16px;text-align:center}
+
+.layout{display:flex;min-height:calc(100vh - 136px)}
+.layout-no-sidebar .sidebar{display:none}
+.sidebar{width:300px;min-width:300px;background:#fff;border-right:1px solid #e8ddd0;overflow-y:auto;height:calc(100vh - 136px);position:sticky;top:136px;transition:width .25s,min-width .25s,opacity .25s;z-index:150}
+.sidebar h2{font-size:.8rem;padding:12px 16px;color:#7a4e36;border-bottom:1px solid #e8ddd0;letter-spacing:1px;display:flex;align-items:center;justify-content:space-between}
+.sidebar h2 .expand-all{font-size:.63rem;color:#c9a87c;cursor:pointer;font-weight:400}
+.main{flex:1;padding:20px 24px;overflow-y:auto;min-height:500px}
+#tree{flex:1;overflow-y:auto;min-height:0}
+
+/* TREE */
+.tree-subject{padding:9px 14px;cursor:pointer;font-size:.8rem;font-weight:700;color:#3a2210;border-bottom:1px solid #f0e8dc;display:flex;align-items:center;justify-content:space-between;transition:background .15s}
+.tree-subject:hover{background:#faf6f0}
+.tree-subject .subj-left{display:flex;align-items:center;flex:1;min-width:0}
+.tree-subject .arrow{width:16px;font-size:.6rem;transition:transform .2s;flex-shrink:0;color:#c9a87c}
+.tree-subject.open .arrow{transform:rotate(90deg)}
+.tree-subject .subj-progress{font-size:.6rem;color:#a09080;margin-left:8px;flex-shrink:0}
+.tree-unit-children{display:none}
+.tree-unit-children.show{display:block}
+.tree-unit{padding:8px 14px 8px 30px;cursor:pointer;font-size:.77rem;font-weight:600;color:#5b3a29;border-bottom:1px solid #f7f1e8;display:flex;align-items:center;transition:background .15s}
+.tree-unit:hover{background:#faf6f0}
+.tree-unit .arrow{width:14px;font-size:.55rem;transition:transform .2s;flex-shrink:0;color:#c9a87c}
+.tree-unit.open .arrow{transform:rotate(90deg)}
+.tree-sub-children{display:none}
+.tree-sub-children.show{display:block}
+.tree-subunit{padding:7px 14px 7px 44px;cursor:pointer;font-size:.74rem;color:#6b5a44;border-bottom:1px solid #fdfbf8;display:flex;align-items:center;transition:background .15s}
+.tree-subunit:hover{background:#f7f1e8}
+.tree-subunit .arrow{width:12px;font-size:.53rem;transition:transform .2s;flex-shrink:0;color:#c9a87c}
+.tree-subunit.open .arrow{transform:rotate(90deg)}
+.tree-point-children{display:none}
+.tree-point-children.show{display:block}
+.tree-point{display:block;padding:6px 14px 6px 58px;cursor:pointer;font-size:.72rem;color:#8a7358;transition:all .15s;border-left:3px solid transparent;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tree-point:hover{background:#f0e8d8;color:#5b3a29}
+.tree-point.active{background:#ede0cc;color:#3a2210;border-left-color:#c9a87c;font-weight:600}
+.tree-point.learned::after{content:' ✓';color:#27ae60;font-size:.6rem}
+.tree-point .tag{display:inline-block;font-size:.55rem;padding:0 3px;border-radius:3px;margin-left:3px}
+.tag-concept{background:#d4e6f1;color:#1a5276}
+.tag-detail{background:#d5f5e3;color:#145a32}
+.tag-apply{background:#fdebd0;color:#7d6608}
+.tag-compare{background:#e8daef;color:#4a235a}
+
+/* CARDS */
+.card{background:#fff;border-radius:10px;padding:24px 26px;margin-bottom:18px;box-shadow:0 1px 6px rgba(0,0,0,.05);border-left:4px solid #c9a87c;position:relative}
+.card h3{font-size:1.05rem;color:#3a2210;margin-bottom:4px;padding-right:50px}
+.card .breadcrumb{font-size:.7rem;color:#a09080;margin-bottom:12px}
+.card-concept{border-left-color:#2980b9}
+.card-detail{border-left-color:#27ae60}
+.card-apply{border-left-color:#e67e22}
+.card-compare{border-left-color:#8e44ad}
+.card .type-badge{display:inline-block;font-size:.63rem;padding:2px 8px;border-radius:10px;margin-bottom:8px;color:#fff}
+.card-concept .type-badge{background:#2980b9}
+.card-detail .type-badge{background:#27ae60}
+.card-apply .type-badge{background:#e67e22}
+.card-compare .type-badge{background:#8e44ad}
+.card .content{font-size:.88rem;color:#4a3f35}
+.card .content p{margin-bottom:8px}
+.card .content ul{margin:6px 0 10px 18px}
+.card .content li{margin-bottom:3px}
+
+.fav-btn{position:absolute;top:18px;right:18px;background:none;border:none;font-size:1.2rem;cursor:pointer;width:34px;height:34px;display:flex;align-items:center;justify-content:center;border-radius:50%;transition:all .15s}
+.fav-btn:active{transform:scale(1.2)}
+.fav-btn.faved{color:#e74c3c}
+
+/* CONTENT BOXES */
+.highlight-box{background:#fef9f0;border:1px solid #e8d5b0;border-radius:6px;padding:11px 15px;margin:10px 0;font-size:.8rem}
+.highlight-box strong{color:#7a4e36}
+.mnemonic{background:#f0f4e8;border:1px solid #c5d5a8;border-radius:6px;padding:11px 15px;margin:10px 0;font-size:.8rem}
+.mnemonic::before{content:"🎵 助记口诀";display:block;font-size:.65rem;color:#6b8c42;margin-bottom:3px;font-weight:600}
+.classic-quote{background:#faf5ef;border-left:3px solid #8b4513;padding:10px 15px;margin:10px 0;font-size:.8rem;font-style:italic;border-radius:0 6px 6px 0}
+.classic-quote::before{content:"📜 经典原文";display:block;font-size:.65rem;color:#8b4513;margin-bottom:3px;font-weight:600;font-style:normal}
+.classic-quote .src{display:block;text-align:right;font-size:.67rem;color:#a09080;margin-top:4px;font-style:normal}
+.plain-lang{background:#f0f6fa;border:1px solid #b8d4e8;border-radius:6px;padding:11px 15px;margin:10px 0;font-size:.8rem}
+.plain-lang::before{content:"💡 通俗理解";display:block;font-size:.65rem;color:#2980b9;margin-bottom:3px;font-weight:600}
+.clinical-case{background:#f5f0eb;border-left:3px solid #c0392b;border-radius:6px;padding:11px 15px;margin:10px 0;font-size:.8rem}
+.clinical-case::before{content:"🏥 临床案例";display:block;font-size:.65rem;color:#c0392b;margin-bottom:3px;font-weight:600}
+.clinical-case .case-diag{display:block;font-size:.72rem;color:#7a4e36;margin-top:4px;font-weight:500}
+.kv{background:#f9f0f0;border-left:3px solid #9b59b6;border-radius:6px;padding:10px 14px;margin:10px 0;font-size:.77rem}
+.kv::before{content:"📌 归纳总结";display:block;font-size:.63rem;color:#9b59b6;margin-bottom:3px;font-weight:600}
+
+/* PROBE BOX — 启发式追问 */
+.probe-box{background:#faf8f5;border:2px solid #d5cfc0;border-radius:10px;padding:18px 20px;margin:18px 0;font-size:.78rem;line-height:1.7}
+.probe-box::before{content:"🔍 你真的理解了吗？";display:block;font-size:.72rem;color:#8b6914;margin-bottom:14px;font-weight:700;letter-spacing:.5px}
+.probe-box .probe-step{margin-bottom:14px;padding:13px 16px;border-radius:8px;position:relative}
+.probe-box .probe-step:last-child{margin-bottom:0}
+.probe-step-intuition{background:#fef9e7;border:1px solid #f0dc8c}
+.probe-step-intuition::before{content:"🤔 第一步";display:block;font-size:.62rem;color:#b7950b;margin-bottom:5px;font-weight:700}
+.probe-step-trigger{background:#fdf2f2;border:1px solid #f5b7b1}
+.probe-step-trigger::before{content:"⚡ 但如果……";display:block;font-size:.62rem;color:#c0392b;margin-bottom:5px;font-weight:700}
+.probe-step-core{background:#eaf6ed;border:1px solid #a9dfbf}
+.probe-step-core::before{content:"💡 核心理念";display:block;font-size:.62rem;color:#1e8449;margin-bottom:5px;font-weight:700}
+.probe-step-core strong{color:#145a32}
+/* DERIVE BOX — 推导链 */
+.derive-box{background:#faf8f5;border:2px solid #c9b896;border-radius:10px;padding:20px 22px;margin:20px 0;font-size:.8rem;line-height:1.7}
+.derive-box::before{content:"🧭 概念推导链";display:block;font-size:.74rem;color:#8b6914;margin-bottom:14px;font-weight:700;letter-spacing:.5px}
+.derive-flow{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:6px;margin-bottom:18px;padding:14px 10px;background:#fff;border-radius:8px;border:1px solid #e8ddd0}
+.derive-flow .df-node{background:#5b3a29;color:#f5e6d3;padding:8px 14px;border-radius:20px;font-size:.72rem;font-weight:600;text-align:center;white-space:nowrap;min-width:60px;flex-shrink:0}
+.derive-flow .df-node.df-concept{background:#2980b9}
+.derive-flow .df-node.df-logic{background:#8e44ad}
+.derive-flow .df-node.df-organ{background:#c0392b}
+.derive-flow .df-node.df-symptom{background:#e67e22}
+.derive-flow .df-arrow{color:#c9a87c;font-size:1rem;font-weight:700;flex-shrink:0}
+.derive-step{margin-bottom:14px;padding:14px 16px;border-radius:8px;position:relative}
+.derive-step:last-child{margin-bottom:0}
+.derive-step .ds-num{display:inline-block;width:22px;height:22px;line-height:22px;text-align:center;border-radius:50%;color:#fff;font-size:.63rem;font-weight:700;margin-right:8px;flex-shrink:0;vertical-align:middle}
+.derive-step .ds-title{font-weight:700;font-size:.82rem;vertical-align:middle}
+.derive-step .ds-body{margin-top:8px;font-size:.78rem;line-height:1.75;padding-left:30px}
+.ds-blue{background:#eaf2f8;border:1px solid #aed6f1}
+.ds-blue .ds-num{background:#2980b9}
+.ds-blue .ds-title{color:#1a5276}
+.ds-purple{background:#f4ecf7;border:1px solid #d2b4de}
+.ds-purple .ds-num{background:#8e44ad}
+.ds-purple .ds-title{color:#4a235a}
+.ds-red{background:#fdedec;border:1px solid #f5b7b1}
+.ds-red .ds-num{background:#c0392b}
+.ds-red .ds-title{color:#78281f}
+.ds-orange{background:#fef5e7;border:1px solid #f9e4b7}
+.ds-orange .ds-num{background:#e67e22}
+.ds-orange .ds-title{color:#7d3c00}
+/* SIDEBAR TOGGLE */
+.sidebar h2 .sidebar-header-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.sidebar-collapse-btn{position:fixed;left:284px;top:50%;transform:translateY(-50%);width:28px;height:64px;border:none;background:#5b3a29;color:#f5e6d3;font-size:.75rem;cursor:pointer;border-radius:6px 0 0 6px;display:flex;align-items:center;justify-content:center;line-height:1;transition:opacity .25s;box-shadow:-1px 0 6px rgba(0,0,0,.1);z-index:160;opacity:0.7}
+.sidebar-collapse-btn:active{background:#4a2e20;opacity:1}
+
+.sidebar-collapse-btn.show{display:flex!important}
+.sidebar-collapse-btn:not(.show){display:none!important}
+.sidebar.collapsed+.sidebar-collapse-btn,.layout .sidebar.collapsed #sidebarCollapseBtn{display:none!important}
+.sidebar-collapse-btn:hover{opacity:1}
+.sidebar-expand-tab{position:fixed;top:50%;left:0;transform:translateY(-50%);z-index:170;width:28px;height:64px;background:#5b3a29;border:none;border-radius:0 6px 6px 0;color:#f5e6d3;cursor:pointer;font-size:.75rem;display:none;align-items:center;justify-content:center;box-shadow:1px 0 6px rgba(0,0,0,.1);opacity:0.7;transition:opacity .25s}
+.sidebar-expand-tab:active{background:#4a2e20}
+.sidebar-expand-tab.show{display:flex}
+.sidebar.collapsed{width:0;min-width:0;opacity:0;overflow:hidden}
+
+.story{background:#f5f0f0;border-left:3px solid #e67e22;border-radius:6px;padding:10px 14px;margin:10px 0;font-size:.77rem;font-style:italic}
+.story::before{content:"📖 历史典故";display:block;font-size:.63rem;color:#e67e22;margin-bottom:3px;font-weight:600;font-style:normal}
+/* COMPARE TABLE */
+.compare-table{display:flex;gap:12px;margin:14px 0}
+.compare-table .ct-left,.compare-table .ct-right{flex:1;border-radius:8px;padding:14px}
+.compare-table .ct-left{background:#f0f8ff;border:2px solid #2980b9}
+.compare-table .ct-right{background:#fff8f0;border:2px solid #e67e22}
+.compare-table h4{font-size:.85rem;margin-bottom:8px}
+.compare-table .ct-left h4{color:#1a5276}
+.compare-table .ct-right h4{color:#7d3c00}
+.compare-table p{margin-bottom:4px;font-size:.78rem}
+/* TRAP BOX */
+.trap-box{background:#fdf2f2;border:2px solid #e74c3c;border-radius:8px;padding:14px;margin:14px 0;font-size:.78rem;line-height:1.6}
+.trap-box::before{content:"🚨 师承考核常设陷阱";display:block;font-size:.72rem;color:#c0392b;margin-bottom:6px;font-weight:700}
+/* MINI QUIZ */
+.mini-quiz{background:#f8f6f0;border:1px solid #d5cfc0;border-radius:8px;padding:16px;margin-top:14px}
+.mini-quiz .mq-title{font-size:.78rem;font-weight:700;color:#5b3a29;margin-bottom:8px}
+.mini-quiz .mq-scene{font-size:.8rem;font-style:italic;color:#6b5a44;margin-bottom:8px;padding:8px 12px;background:#fff;border-radius:6px;border:1px solid #e8ddd0}
+.mini-quiz .mq-q{font-size:.78rem;font-weight:600;color:#3a2210;margin-bottom:8px}
+.mini-quiz .mq-opts{display:flex;flex-wrap:wrap;gap:8px}
+.mini-quiz .mq-opt{padding:8px 16px;border:1.5px solid #c9a87c;border-radius:20px;cursor:pointer;font-size:.75rem;transition:all .15s;background:#fff}
+.mini-quiz .mq-opt:hover{background:#fdf6ec;border-color:#8b6914}
+.mini-quiz .mq-opt.chosen-right{background:#d5f5e3;border-color:#27ae60;color:#145a32;font-weight:600}
+.mini-quiz .mq-opt.chosen-wrong{background:#fdedec;border-color:#e74c3c;color:#922b21}
+.mini-quiz .mq-feedback{padding:10px 14px;margin-top:10px;border-radius:6px;font-size:.75rem;line-height:1.5}
+.mini-quiz .mq-feedback.fb-right{background:#eafaf1;border:1px solid #a9dfbf}
+.mini-quiz .mq-feedback.fb-wrong{background:#fef9f0;border:1px solid #e8d5b0}
+
+/* IN-CARD QUIZ */
+.card-quiz{margin-top:18px;border-top:1px solid #eee;padding-top:14px}
+.card-quiz .cq-title{font-size:.75rem;font-weight:600;color:#7a4e36;margin-bottom:10px}
+.cq-item{background:#fdfbf8;border:1px solid #e8ddd0;border-radius:8px;padding:12px 15px;margin-bottom:8px}
+.cq-item .cq-q{font-size:.8rem;color:#3a2210;margin-bottom:8px}
+.cq-item .cq-opts{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
+.cq-item .cq-opt{padding:7px 12px;border:1.5px solid #e8ddd0;border-radius:6px;cursor:pointer;font-size:.78rem;transition:all .12s;min-height:36px;display:flex;align-items:center}
+.cq-item .cq-opt:active{background:#f7f1e8}
+.cq-item .cq-opt.chosen{border-color:#c9a87c;background:#fdf6ec}
+.cq-item .cq-opt.correct{border-color:#27ae60!important;background:#eafaf1!important;color:#145a32!important}
+.cq-item .cq-opt.wrong{border-color:#e74c3c!important;background:#fdedec!important;color:#922b21!important}
+.cq-item .cq-result{font-size:.75rem;margin-top:6px;display:none}
+.cq-item .cq-result.show{display:block}
+.cq-item .cq-result.right{color:#145a32}
+.cq-item .cq-result.wrong{color:#922b21}
+
+.empty-state{text-align:center;padding:60px 20px;color:#a09080}
+.empty-state .icon{font-size:3rem;margin-bottom:14px}
+
+/* FAVORITES */
+.fav-list .fav-item{background:#fff;border-radius:8px;padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 1px 4px rgba(0,0,0,.04);cursor:pointer;border-left:3px solid #c9a87c;min-height:44px}
+.fav-list .fav-item:active{background:#f8f4ec}
+.fav-list .fav-item .fav-info{flex:1;min-width:0}
+.fav-list .fav-item .fav-title{font-size:.85rem;font-weight:600;color:#3a2210}
+.fav-list .fav-item .fav-path{font-size:.68rem;color:#a09080;margin-top:2px}
+.fav-list .fav-item .fav-del{color:#ccc;font-size:1rem;cursor:pointer;padding:6px;min-width:30px;text-align:center}
+.fav-list .fav-item .fav-del:active{color:#e74c3c}
+
+/* QUIZ SYSTEM */
+.quiz-container{max-width:750px;margin:0 auto}
+.quiz-subj-select{margin-bottom:16px;background:#fff;border-radius:10px;padding:16px;box-shadow:0 1px 6px rgba(0,0,0,.05)}
+.quiz-subj-select h3{font-size:.85rem;color:#5b3a29;margin-bottom:10px}
+.quiz-subj-grid{display:flex;flex-wrap:wrap;gap:8px}
+.quiz-subj-chip{padding:7px 14px;border:1.5px solid #e8ddd0;border-radius:20px;font-size:.75rem;cursor:pointer;user-select:none;transition:all .12s;min-height:36px;display:flex;align-items:center}
+.quiz-subj-chip.selected{background:#5b3a29;color:#f5e6d3;border-color:#5b3a29}
+.quiz-subj-chip:active{transform:scale(0.96)}
+.quiz-count-row{display:flex;align-items:center;gap:12px;margin-top:12px;flex-wrap:wrap}
+.quiz-count-row label{font-size:.78rem;color:#5b3a29}
+.quiz-count-row select,.quiz-count-row input{padding:8px 12px;border:1.5px solid #e8ddd0;border-radius:8px;font-size:.82rem;font-family:inherit;min-height:40px}
+.quiz-count-row button{padding:9px 20px;border:none;border-radius:8px;font-size:.82rem;cursor:pointer;font-weight:600;min-height:40px;font-family:inherit}
+
+.btn-primary{background:#5b3a29;color:#f5e6d3}
+.btn-primary:active{background:#4a2e20}
+.btn-secondary{background:#fff;color:#5b3a29;border:1.5px solid #c9a87c}
+.btn-secondary:active{background:#fdf6ec}
+.btn-small{padding:6px 12px!important;font-size:.72rem!important;min-height:34px!important}
+
+.quiz-card{background:#fff;border-radius:10px;padding:22px 24px;margin-bottom:14px;box-shadow:0 1px 5px rgba(0,0,0,.04)}
+.quiz-card .q-num{font-size:.7rem;color:#c9a87c;margin-bottom:5px}
+.quiz-card .q-type-label{display:inline-block;font-size:.6rem;padding:1px 6px;border-radius:7px;margin-left:5px}
+.qtype-choice{background:#d4e6f1;color:#1a5276}
+.qtype-fill{background:#d5f5e3;color:#145a32}
+.qtype-match{background:#e8daef;color:#4a235a}
+.qtype-dyn{background:#fff3cd;color:#856404;border:1px solid #ffeaa7}
+.quiz-card .q-text{font-size:.9rem;color:#3a2210;margin-bottom:12px;font-weight:500}
+.quiz-card .q-link{font-size:.65rem;color:#c9a87c;cursor:pointer;margin-left:6px}
+.quiz-card .option{display:block;padding:10px 13px;margin:5px 0;border:1.5px solid #e8ddd0;border-radius:8px;cursor:pointer;font-size:.82rem;transition:all .12s;min-height:42px}
+.quiz-card .option:active{background:#f7f1e8}
+.quiz-card .option.selected{border-color:#c9a87c;background:#fdf6ec}
+.quiz-card .option.correct{border-color:#27ae60;background:#eafaf1;color:#145a32}
+.quiz-card .option.wrong{border-color:#e74c3c;background:#fdedec;color:#922b21}
+.quiz-card .fill-input{width:100%;padding:11px 13px;border:1.5px solid #e8ddd0;border-radius:8px;font-size:.88rem;font-family:inherit;min-height:44px}
+.quiz-card .fill-input:focus{outline:none;border-color:#c9a87c}
+
+.match-grid{display:flex;gap:16px}
+.match-col{flex:1}
+.match-col .match-header{font-size:.75rem;font-weight:600;color:#7a4e36;margin-bottom:6px}
+.match-row{display:flex;align-items:center;padding:8px 10px;border:1.5px solid #e8ddd0;border-radius:8px;margin-bottom:5px;font-size:.8rem;min-height:40px}
+.match-row select{flex:1;padding:6px;font-size:.8rem;border:1.5px solid #e8ddd0;border-radius:6px;background:#fff;font-family:inherit}
+.match-num{width:22px;color:#c9a87c;font-weight:600;flex-shrink:0}
+
+.quiz-explanation{background:#fef9f0;border:1px solid #e8d5b0;border-radius:6px;padding:11px 15px;margin-top:10px;font-size:.78rem;display:none;white-space:pre-wrap}
+.quiz-explanation.show{display:block}
+.quiz-explanation strong{color:#7a4e36}
+
+.quiz-result{text-align:center;padding:8px 0;margin-bottom:16px}
+.quiz-result .score{font-size:2rem;font-weight:700;color:#5b3a29
+
+.quiz-result .msg{font-size:.82rem;color:#8a7358;margin-top:4px}
+
+.history-item{background:#fff;border-radius:8px;padding:13px 16px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.history-item .h-q{font-size:.8rem;color:#3a2210;font-weight:500}
+.history-item .h-meta{font-size:.68rem;color:#a09080;margin-top:3px}
+.history-item .h-badge{display:inline-block;padding:1px 7px;border-radius:7px;font-size:.62rem;margin-left:5px}
+.h-badge-right{background:#d5f5e3;color:#145a32}
+.h-badge-wrong{background:#fdedec;color:#922b21}
+
+/* WRONG BOOK */
+.wb-container{max-width:850px;margin:0 auto}
+.wb-item{background:#fff;border-radius:8px;padding:12px 15px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.04);border-left:3px solid #e74c3c}
+.wb-q{font-size:.82rem;color:#3a2210;font-weight:500;line-height:1.5}
+.wb-type{display:inline-block;font-size:.6rem;padding:1px 6px;border-radius:7px;background:#e8daef;color:#4a235a;margin-left:4px}
+.wb-wrongcnt{display:inline-block;font-size:.62rem;padding:1px 6px;border-radius:7px;background:#fdedec;color:#922b21;margin-left:4px}
+.wb-meta{font-size:.7rem;color:#a09080;margin:4px 0 6px}
+.wb-actions{display:flex;gap:6px;flex-wrap:wrap}
+
+/* MOBILE */
+#sidebarOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:149}
+@media(max-width:768px){
+  .derive-box{padding:14px 12px}
+  .derive-flow{padding:10px 6px;gap:4px}
+  .derive-flow .df-node{font-size:.65rem;padding:6px 10px}
+  .derive-flow .df-arrow{font-size:.8rem}
+  .derive-step{padding:10px 12px}
+  .derive-step .ds-body{padding-left:0;font-size:.74rem}
+  .probe-box{padding:14px 12px;font-size:.74rem}
+  .probe-box .probe-step{padding:10px 12px}
+  .layout{display:block!important}
+  body{padding:0;font-size:15px}
+  .sidebar{position:fixed;left:0;top:0;z-index:160;height:100vh;transform:translateX(-100%);width:280px;min-width:280px}
+  .sidebar.visible{transform:translateX(0)}
+  #sidebarOverlay.show{display:block}
+  .main{padding:12px 10px}
+  .card{padding:16px 14px;margin:6px 0}
+  .card h3{font-size:.95rem}
+  header h1{font-size:.82rem}
+  .tabbar{flex-wrap:wrap;gap:2px}
+  .tabbar .tab{font-size:.72rem;padding:9px 4px;min-height:44px;min-width:44px;flex:1 1 auto}
+  .quiz-card{padding:14px 12px}
+  .quiz-card .q-text{font-size:.88rem}
+  .quiz-card .option{min-height:44px;font-size:.85rem;padding:11px 13px}
+  .match-grid{flex-direction:column;gap:8px}
+  .compare-table{flex-direction:column;gap:8px;overflow-x:auto}
+  .progress-bar-wrap{padding:8px 12px}
+  .sp-stage{padding:14px 12px}
+  .pe-layout{flex-direction:column}
+  .pe-sidebar{width:100%;min-width:auto;max-height:none;border-right:none;border-bottom:1px solid #e8ddd0}
+  .pe-main{padding:12px 10px}
+  .wb-filter-row{flex-wrap:wrap}
+}
+
+/* 跨科搜索（xlink.js A） */
+.search-wrap{padding:8px 10px 6px;position:sticky;top:0;z-index:20;background:#fff;border-bottom:1px solid #f0e8dc}
+#searchBox{width:100%;box-sizing:border-box;padding:7px 10px;border:1px solid #d4c5a0;border-radius:8px;font-size:.85rem;background:#fffdfa;outline:none}
+#searchBox:focus{border-color:#d4a84b;box-shadow:0 0 0 2px rgba(212,168,75,.15)}
+.search-results{padding:0 10px 10px;overflow-y:auto}
+.sr-summary{color:#8b6914;font-size:.75rem;padding:6px 2px 8px;border-bottom:1px dashed #e0d4b0;margin-bottom:6px}
+.sr-related{display:flex;flex-wrap:wrap;gap:4px;padding:4px 0 8px}
+.sr-related-tag{font-size:.72rem;background:#fdf3d8;color:#8b6914;padding:3px 7px;border-radius:10px;cursor:pointer;border:1px solid #ecd99e}
+.sr-related-tag:hover{background:#f5e3a8}
+.sr-group{margin-bottom:6px}
+.sr-group-title{font-size:.8rem;color:#5b3a29;font-weight:600;padding:6px 8px;cursor:pointer;border-radius:5px;background:#f5ede0;border:1px solid #e8dcc4;display:flex;align-items:center;gap:5px;user-select:none}
+.sr-group-title:hover{background:#ede0cc}
+.sr-group-title::before{content:'▸';color:#c9a87c;font-size:.7rem;transition:transform .15s;display:inline-block}
+.sr-group.open .sr-group-title::before{content:'▾'}
+.sr-group-items{display:none;padding:2px 0 4px}
+.sr-group.open .sr-group-items{display:block}
+.sr-cnt{color:#a89060;font-weight:400;font-size:.7rem;margin-left:auto;background:#fff;border:1px solid #e8dcc4;border-radius:8px;padding:0 6px}
+.sr-item{padding:7px 8px;border-radius:6px;cursor:pointer;border:1px solid transparent}
+.sr-item:hover{background:#fdf3d8;border-color:#ecd99e}
+.sr-item-name{font-size:.84rem;color:#3a2e15;font-weight:500}
+.sr-item-path{font-size:.7rem;color:#a08a55;margin-top:2px}
+.sr-item-snippet{font-size:.74rem;color:#6b5a3a;margin-top:3px;line-height:1.4;max-height:3.2em;overflow:hidden}
+.sr-item-snippet mark,.sr-item-name mark{background:#ffe89a;color:inherit;padding:0 1px;border-radius:2px}
+.sr-empty{color:#a09080;font-size:.82rem;padding:16px 4px;text-align:center}
+
+/* 跨科链接（xlink.js B） */
+.card .content .xlink{color:#b8860b !important;text-decoration:none;border-bottom:1px solid #d4a84b;cursor:pointer;padding:0 1px;font-weight:500}
+.card .content .xlink:hover{background:#fdf3d8 !important;color:#8b6914 !important}
+
+/* 导航面包屑（xlink.js B 批次4） */
+.nav-breadcrumb{display:flex;align-items:center;flex-wrap:wrap;gap:3px;padding:6px 10px;margin-bottom:10px;background:#faf5ef;border:1px solid #e8d5b0;border-radius:6px;font-size:.78rem;color:#6b5a3a}
+.nav-back{background:#fff;border:1px solid #d4a84b;color:#8b6914;padding:2px 9px;border-radius:5px;cursor:pointer;font-size:.76rem;margin-right:4px}
+.nav-back:hover{background:#fdf3d8}
+.nav-crumb{color:#5b3a29;cursor:pointer;padding:1px 4px;border-radius:3px;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nav-crumb:hover{background:#fdf3d8;color:#8b6914}
+.nav-crumb.current{color:#8b6914;font-weight:600;cursor:default;background:transparent}
+.nav-sep{color:#c9a87c;margin:0 1px}
+.nav-ellipsis{color:#a09080}
+</style>
+</head>
+<body>
+
+<header>
+  <button id="menuToggle" aria-label="菜单">☰</button>
+  <h1 id="headerTitle">📖 传统医学出师考核</h1>
+  <div class="hdr-btns"></div>
+</header>
+
+<div class="progress-bar-wrap" id="progressBarWrap">
+  <div class="pb-label"><span id="progressLabel">整体学习进度</span><span id="progressPercent">0%</span></div>
+  <div class="progress-bar"><div class="fill" id="progressFill" style="width:0%"></div></div>
+</div>
+
+<div class="tabbar">
+  <div class="tab active" data-tab="study">📚 学习</div>
+  <div class="tab" data-tab="studyPlan">📋 路线</div>
+  <div class="tab" data-tab="quiz">✏️ 练习</div>
+  <div class="tab" data-tab="wrongBook">📕 错题</div>
+  <div class="tab" data-tab="stats">📊 统计</div>
+  <div class="tab" data-tab="favs">⭐ 收藏<span class="tab-badge" id="favTabBadge">0</span></div>
+  <div class="tab" data-tab="practical">🏥 实践</div>
+</div>
+
+<div id="sidebarOverlay"></div>
+<button class="sidebar-expand-tab" id="sidebarExpandTab" title="展开侧栏" style="display:none">▶</button>
+
+<div class="layout" id="layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="search-wrap">
+      <input id="searchBox" type="text" placeholder="🔍 搜索知识点/方剂/中药…" autocomplete="off">
+    </div>
+    <h2>📋 大纲导航 <span class="expand-all" id="expandAll">展开全部</span></h2>
+    <div id="tree"></div>
+    <div id="searchResults" class="search-results" style="display:none"></div>
+  </aside>
+  <main class="main" id="mainContent">
+    <div class="empty-state"><div class="icon">👈</div><p>从左侧大纲选择一个要点<br>即可查看知识详解</p></div>
+  </main>
+  <button class="sidebar-collapse-btn show" id="sidebarCollapseBtn" title="收起侧栏">◀</button>
+</div>
+
+<script src="app.js"></script>
+<script src="dynquiz.js"></script>
+<script src="xlink.js"></script>
+<script src="mini-quiz-patch.js"></script>
+<script src="subjects/s1-zhongji.js"></script>
+<script src="subjects/s2-zhongzhen.js"></script>
+<script src="subjects/s3-zhongyao.js"></script>
+<script src="subjects/s4-fangji.js"></script>
+<script src="subjects/s5-neike.js"></script>
+<script src="subjects/s6-waike.js"></script>
+<script src="subjects/s7-fuke.js"></script>
+<script src="subjects/s8-erke.js"></script>
+<script src="subjects/s9-zhenjiu.js"></script>
+<script src="practical-exam.js"></script>
+</body>
+</html>

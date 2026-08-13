@@ -1,0 +1,10 @@
+{
+  "name": "中医出师考核备考工具",
+  "short_name": "出师备考",
+  "description": "传统医学出师考核一站式学习工具",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f5f0eb",
+  "theme_color": "#8b4513",
+  "orientation": "any"
+}

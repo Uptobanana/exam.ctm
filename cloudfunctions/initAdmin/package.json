@@ -1,0 +1,10 @@
+{
+  "name": "initAdmin",
+  "version": "1.0.0",
+  "description": "一次性引导创建管理员账号",
+  "main": "index.js",
+  "dependencies": {
+    "@cloudbase/node-sdk": "latest",
+    "bcryptjs": "^2.4.3"
+  }
+}
