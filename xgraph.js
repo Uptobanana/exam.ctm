@@ -63,12 +63,17 @@
 
   XGraph.open = function (centerId) {
     injectStyles();
-    if (!centerId || !(window.XLink && XLink.findPoint(centerId))) { alert('未找到该知识点，无法绘制图谱'); return; }
+    if (!centerId || !(window.XLink && XLink.findPoint(centerId))) {
+      alert('未找到该知识点（ID: ' + centerId + '），无法绘制图谱。请检查 XLink.init 是否完成（应在所有学科文件加载后调用）。');
+      return;
+    }
     scale = 1; tx = 0; ty = 0;
     if (!overlay) buildShell();
     if (!overlay.parentNode) document.body.appendChild(overlay);
     render(centerId);
     document.addEventListener('keydown', onKey);
+    // 调试暴露
+    try { window.__XGRAPH_DEBUG__ = { centerId: centerId, nodes: (XLink.getNeighbors(centerId) || {}), ts: Date.now() }; } catch (e) {}
   };
 
   function buildShell() {
@@ -104,7 +109,13 @@
   }
 
   function render(centerId) {
-    var sg = XLink.getSubgraph(centerId, 1, 30);
+    try {
+      var sg = XLink.getSubgraph(centerId, 1, 30);
+    } catch (e) {
+      console.error('[XGraph] getSubgraph 失败:', e);
+      viewport.innerHTML = '<text x="380" y="250" text-anchor="middle" fill="#c00" font-size="14">图谱数据异常: ' + String(e && e.message || e) + '</text>';
+      return;
+    }
     var nodeMap = {};
     sg.nodes.forEach(function (n) { nodeMap[n.id] = n; });
     var cp = XLink.findPoint(centerId);

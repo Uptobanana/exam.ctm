@@ -77,7 +77,7 @@
       var relMap = {};
       for (var e = 0; e < extra.length; e++) {
         var f = extra[e].from, t = extra[e].to;
-        if (!f || !t || !Point_MAP[f] || !Point_MAP[t]) continue; // 跳过死链
+        if (!f || !t || !POINT_MAP[f] || !POINT_MAP[t]) continue; // 跳过死链
         if (!OUTBOUND[f]) OUTBOUND[f] = [];
         if (OUTBOUND[f].indexOf(t) < 0) OUTBOUND[f].push(t);
         if (!INBOUND[t]) INBOUND[t] = [];
