@@ -1,11 +1,13 @@
-var CACHE_NAME = 'tcm-exam-v3';
+var CACHE_NAME = 'tcm-exam-v4';
 var CACHE_URLS = [
   './',
   './index.html',
   './manifest.json',
   './app.js',
   './dynquiz.js',
+  './subjects/concept-links.js',
   './xlink.js',
+  './xgraph.js',
   './mini-quiz-patch.js',
   './practical-exam.js',
   './subjects/s1-zhongji.js',

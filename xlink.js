@@ -71,6 +71,21 @@
         if (INBOUND[inner].indexOf(p.id) < 0) INBOUND[inner].push(p.id);
       }
     });
+    // 合并 concept-links.js 的额外跨科链接（人工精选，不侵入知识点内容文件）
+    var extra = window.XLINK_EXTRA;
+    if (extra && extra.length) {
+      var relMap = {};
+      for (var e = 0; e < extra.length; e++) {
+        var f = extra[e].from, t = extra[e].to;
+        if (!f || !t || !Point_MAP[f] || !Point_MAP[t]) continue; // 跳过死链
+        if (!OUTBOUND[f]) OUTBOUND[f] = [];
+        if (OUTBOUND[f].indexOf(t) < 0) OUTBOUND[f].push(t);
+        if (!INBOUND[t]) INBOUND[t] = [];
+        if (INBOUND[t].indexOf(f) < 0) INBOUND[t].push(f);
+        if (extra[e].rel) relMap[f + ' ' + t] = extra[e].rel;
+      }
+      XLink._EXTRA_REL = relMap;
+    }
   }
 
   function injectStyles() {
