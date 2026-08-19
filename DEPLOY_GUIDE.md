@@ -55,6 +55,7 @@ https://你的用户名.github.io/tcm-exam/
 
 ## 补充说明
 
-- **PWA 离线可用**：Service Worker 已配置好，首次访问后断网也能用
+- **PWA 离线可用（现已真正生效）**：`index.html` 已注册 Service Worker，`sw.js` 预缓存全部 19 个静态资源（含 9 个科目 js、2 个 json 与核心脚本）。首次通过 **HTTPS 或 localhost** 访问后，断网也能正常使用，且可被「添加到主屏幕」安装为独立应用。
+  - ⚠️ **必须用网址打开**：双击 `index.html` 以 `file://` 方式打开时，Service Worker 不会激活（非安全上下文），离线功能将失效。请通过部署后的 https 域名或本地 `localhost` 静态服务器访问。
 - **更新内容**：本地改完后，再次执行 `git add . && git commit -m "更新说明" && git push` 即可自动更新
 - **HTTPS**：GitHub Pages 自动提供 HTTPS，PWA 所需条件均已满足

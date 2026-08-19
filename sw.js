@@ -1,10 +1,24 @@
-var CACHE_NAME = 'tcm-exam-v2';
+var CACHE_NAME = 'tcm-exam-v3';
 var CACHE_URLS = [
   './',
   './index.html',
+  './manifest.json',
   './app.js',
+  './dynquiz.js',
+  './xlink.js',
+  './mini-quiz-patch.js',
   './practical-exam.js',
-  './mini-quiz-patch.js'
+  './subjects/s1-zhongji.js',
+  './subjects/s2-zhongzhen.js',
+  './subjects/s3-zhongyao.js',
+  './subjects/s4-fangji.js',
+  './subjects/s5-neike.js',
+  './subjects/s6-waike.js',
+  './subjects/s7-fuke.js',
+  './subjects/s8-erke.js',
+  './subjects/s9-zhenjiu.js',
+  './subjects/study-plan.json',
+  './subjects/practical-exam.json'
 ];
 
 // Install: pre-cache core files
