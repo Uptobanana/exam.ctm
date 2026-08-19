@@ -403,7 +403,6 @@ function showCard(id) {
     '<div class="card ' + cls + '" id="card-' + p.id + '">' +
       '<button class="fav-btn' + (isFaved?' faved':'') + '" data-favid="' + p.id + '" aria-label="收藏">' + (isFaved?'❤':'🤍') + '</button>' +
       '<span class="type-badge">' + (p.content ? typeBadgeLabels[p.type] || '' : '待完善') + '</span>' +
-      '<button class="graph-btn" data-graphid="' + p.id + '" title="查看跨科知识图谱">🕸 图谱</button>' +
       '<h3>' + p.name + '</h3>' +
       '<div class="breadcrumb">' + getPointPath(p.id) + '</div>' +
       '<div class="content">' + (window.XLink && p.content ? XLink.processContent(p.content, p.id) : (p.content || '<p style="color:#a09080">该知识点的详细内容正在整理中，请先查看已有详解的单元。</p>')) + '</div>' +
@@ -415,13 +414,6 @@ function showCard(id) {
     favBtn.addEventListener('click', function(e) {
       e.stopPropagation();
       toggleFav(p.id, favBtn);
-    });
-  }
-  var graphBtn = mainContent.querySelector('.graph-btn');
-  if (graphBtn && window.XGraph) {
-    graphBtn.addEventListener('click', function(e) {
-      e.stopPropagation();
-      window.XGraph.open(p.id);
     });
   }
   if (p.cardQuiz) bindCardQuiz();
