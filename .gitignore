@@ -22,3 +22,8 @@ Thumbs.db
 # ---- Python 缓存 ----
 __pycache__/
 *.pyc
+
+# ---- Obsidian 导出产物（由 export-to-obsidian.js 生成，不进应用仓库） ----
+obsidian-export/
+obsidian-export-callout/
+verify-obsidian-links.js
